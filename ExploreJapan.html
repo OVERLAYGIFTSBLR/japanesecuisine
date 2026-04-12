@@ -139,6 +139,25 @@
             text-decoration: none;
             z-index: 100;
         }
+
+        /* Selfie Tip Styling */
+        .selfie-tip {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(8, 6, 4, 0.8);
+            border: 1px solid var(--yama);
+            color: var(--yama2);
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 50;
+        }
     </style>
 </head>
 <body>
@@ -150,11 +169,11 @@
         <p>Augmented Reality Landmarks</p>
     </div>
 
-    <div class="explorer-grid" id="grid">
-        </div>
+    <div class="explorer-grid" id="grid"></div>
+
+    <div class="selfie-tip">📸 Tip: Move phone to enable depth for selfies</div>
 
     <script>
-        // List of models from your screenshot
         const landmarks = [
             { name: "Tokyo Skytree", city: "Tokyo", file: "tokyo skytree 3d model.glb" },
             { name: "Osaka Castle", city: "Osaka", file: "Osaka Castle 3d model.glb" },
@@ -172,31 +191,30 @@
         landmarks.forEach(l => {
             const card = document.createElement('div');
             card.className = 'landmark-card';
-            // Path points to your ExploreJapan folder in GitHub
             const modelPath = `ExploreJapan/${l.file}`;
             
             card.innerHTML = `
-                <<model-viewer 
-    src="${modelPath}" 
-    ar 
-    ar-modes="webxr scene-viewer quick-look" 
-    ar-placement="floor" 
-    camera-controls 
-    shadow-intensity="1" 
-    exposure="1"
-    style="width: 100%; height: 100%;">
-</model-viewer>
+                <model-viewer 
+                    src="${modelPath}" 
+                    ar 
+                    ar-modes="webxr scene-viewer quick-look" 
+                    ar-placement="floor"
+                    camera-controls 
+                    interaction-prompt="auto"
+                    shadow-intensity="1.5" 
+                    exposure="1.2"
+                    style="width: 100%; height: 100%;">
+                </model-viewer>
                 <div class="landmark-info">
                     <div class="landmark-name">${l.name}</div>
                     <div class="landmark-city">${l.city}</div>
                     <button class="ar-btn" onclick="this.parentElement.previousElementSibling.activateAR()">
-                        <span>🪐</span> View in Real World
+                        <span>🤳</span> View in Real World
                     </button>
                 </div>
             `;
             grid.appendChild(card);
         });
-        
     </script>
 </body>
 </html>
