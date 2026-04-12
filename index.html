@@ -594,13 +594,22 @@ function buildCards() {
 <div class="dish-bg"></div>
 <div class="dish-viewer" id="viewer_${idx}">
   ${has3d ? `
+    <model-viewer id="mv_${idx}" src="${item.glb_url}" loading="eager" reveal="auto" ios-src="${item.glb_url.replace('.glb','.usdz')}" alt="${item.name}" ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" ar-placement="floor" shadow-intensity="1.2" shadow-softness="0.7" exposure="1.1" environment-image="neutral" camera-controls interaction-prompt="none" min-camera-orbit="auto auto 5%" max-camera-orbit="auto auto 200%" xr-environment style="width:100%;height:100%;background:transparent;--poster-color:transparent"></model-viewer>
+    <div class="model-loader" id="loader_${idx}"><div class="loader-ring"></div><div class="loader-txt">${t.loading}</div></div>`
+  : `<div class="viewer-no-model"><div class="viewer-no-emoji">${item.emoji}</div><div class="viewer-no-txt">${t.noModel}</div></div>`}
+  <div class="viewer-corner tl"></div><div class="viewer-corner tr"></div>
+  <div class="viewer-corner bl"></div><div class="viewer-corner br"></div>
+  <div class="viewer-badge"><div class="vb-dot"></div><div class="vb-txt">${has3d ? t.drag3d : t.preview}</div></div>
+</div>
+<div class="dish-viewer" id="viewer_${idx}">
+  ${has3d ? `
    <model-viewer id="mv_${idx}" src="${item.glb_url}" loading="eager" reveal="auto" ios-src="${item.glb_url.replace('.glb','.usdz')}" alt="${item.name}" ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" ar-placement="floor" shadow-intensity="1.2" shadow-softness="0.7" exposure="1.1" environment-image="neutral" camera-controls interaction-prompt="none" min-camera-orbit="auto auto 5%" max-camera-orbit="auto auto 200%" xr-environment style="width:100%;height:100%;background:transparent;--poster-color:transparent"></model-viewer>
   ar ar-modes="webxr scene-viewer quick-look"${item.glb_url.replace('.glb','.usdz')}" alt="${item.name}"
       ar ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" ar-placement="floor"
       shadow-intensity="1.2" shadow-softness="0.7" exposure="1.1" environment-image="neutral"
       camera-controls interaction-prompt="none"
       min-camera-orbit="auto auto 5%" max-camera-orbit="auto auto 200%"
-      xr-environment style="width:100%;height:100%;background:transparent;--poster-color:transparent"></model-viewer>
+      xr-environment style="width:100%;height:100%;background:transparent;--poster-color:transparent">
     <div class="model-loader" id="loader_${idx}"><div class="loader-ring"></div><div class="loader-txt">${t.loading}</div></div>`
   : `<div class="viewer-no-model"><div class="viewer-no-emoji">${item.emoji}</div><div class="viewer-no-txt">${t.noModel}</div></div>`}
   <div class="viewer-corner tl"></div><div class="viewer-corner tr"></div>
