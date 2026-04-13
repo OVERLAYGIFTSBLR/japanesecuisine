@@ -605,7 +605,6 @@ function triggerAR(idx) {
   // Desktop fallback
   showToast('📱 Open on your phone to view in AR');
 }
-}
 function addToCart(id,cardIdx){
   const item=menuItems.find(i=>i.id===id);if(!item||!item.available)return;
   cart[id]=(cart[id]||0)+1; updateCartUI();
