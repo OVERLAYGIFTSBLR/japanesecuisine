@@ -6,10 +6,12 @@
   <title>Sakura Kitchen — AR Menu</title>
   <meta name="description" content="Interactive AR menu for Sakura Kitchen — authentic Japanese cuisine with 3D dish previews." />
 
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
 
+  <!-- Model Viewer for AR/3D -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
   <style>
@@ -467,6 +469,7 @@
 </head>
 <body>
 
+<!-- ═══════════════════ HEADER ═══════════════════════ -->
 <header class="site-header">
   <div id="language-picker" style="margin-bottom: 15px; position: relative; z-index: 10;">
     <select id="lang-select" style="background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.3); border-radius: 5px; padding: 6px 10px; font-family: 'DM Sans', sans-serif; font-size: 12px;">
@@ -487,18 +490,21 @@
   </span>
 </header>
 
+<!-- ═══════════════════ TABS ════════════════════════ -->
 <nav class="tabs-wrap" aria-label="Menu categories">
   <div class="tabs-inner" id="tabs-inner"></div>
 </nav>
 
+<!-- ═══════════════════ MAIN ════════════════════════ -->
 <main class="main" id="main-content">
   <div class="state-box" id="loading-state">
     <div class="spinner"></div>
-    <p id="ui-loading">Loading menu…</p>
+    <p>Loading menu…</p>
   </div>
   <div id="items-container" style="display:none"></div>
 </main>
 
+<!-- ═══════════════════ MODAL ════════════════════════ -->
 <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-label="Dish detail">
   <div class="modal-card" id="modal-card">
     <div class="modal-viewer-wrap" id="modal-viewer-wrap">
@@ -506,10 +512,6 @@
       <span class="viewer-hint">drag to rotate · pinch to zoom · AR places dish on surface</span>
     </div>
     <div class="modal-body">
-      <button id="ar-capture-btn" class="ar-btn" style="width: 100%; margin-bottom: 15px; justify-content: center; background: #c0392b; height: 45px; font-weight: 600;">
-        📸 Capture & Share
-      </button>
-
       <h2 class="modal-name" id="modal-name"></h2>
       <p class="modal-jp" id="modal-jp"></p>
       <div class="tags-row" id="modal-tags"></div>
@@ -522,6 +524,7 @@
   </div>
 </div>
 
+<!-- ═══════════════════ FOOTER ═══════════════════════ -->
 <footer class="site-footer">
   Tap any dish to view in 3D &nbsp;·&nbsp; Prices in ₹ &nbsp;·&nbsp; 🌿 Vegetarian friendly<br>
   <span style="opacity:0.5">AR requires a compatible mobile device</span>
@@ -534,7 +537,7 @@
   //    File → Share → Publish to web → CSV
   // ─────────────────────────────────────────────────────────────
   const SHEET_ID  = '1QAReLCzWLQEfNyY9V6Cg5VbGPqmbXh4XCZ_RCQSRlz0';
-  const SHEET_GID = '0'; // change if your data is on a different tab
+  const SHEET_GID = '0'; // change if your data is on a different tab (check URL: ...gid=XXXXX)
 
   const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
 
@@ -545,31 +548,13 @@
     'salmon sashimi': '🐟', tempura: '🍤', 'matcha ice cream': '🍦',
   };
 
-  const translations = {
-    en: { sub: "Authentic Japanese Cuisine", badge: "Interactive 3D & AR Preview", veg: "veg", capture: "Capture & Share", loading: "Loading menu...", suffix: "" },
-    jp: { sub: "本物の日本料理", badge: "インタラクティブ3DとARプレビュー", veg: "ベジ", capture: "キャプチャして共有", loading: "読み込み中...", suffix: "_jp" },
-    kn: { sub: "ಅಧಿಕೃತ ಜಪಾನೀಸ್ ಆಹಾರ", badge: "ಸಂವಾದಾತ್ಮಕ 3D ಮತ್ತು AR ಮುನ್ನೋಟ", veg: "ಸಸ್ಯಹಾರಿ", capture: "ಸೆರೆಹಿಡಿಯಿರಿ ಮತ್ತು ಹಂಚಿಕೊಳ್ಳಿ", loading: "ಲೋಡ್ ಆಗುತ್ತಿದೆ...", suffix: "_kn" },
-    ta: { sub: "உண்மையான ஜப்பானிய உணவு", badge: "ஊடாடும் 3D மற்றும் AR மாதிரிக்காட்சி", veg: "சைவம்", capture: "பிடிப்பு மற்றும் பகிர்வு", loading: "ஏற்றப்படுகிறது...", suffix: "_ta" },
-    ml: { sub: "ആധികാരിക ജാപ്പനീസ് വിഭവങ്ങൾ", badge: "ഇന്ററാക്ടീവ് 3D & AR പ്രിവ്യൂ", veg: "വെജിറ്റേറിയൻ", capture: "പകർത്തുക, പങ്കികൊള്ളുക", loading: "ലോഡ് ചെയ്യുന്നു...", suffix: "_ml" },
-    te: { sub: "ప్రామాణిక జపనీస్ వంటకాలు", badge: "ఇంటరాక్టివ్ 3D & AR ప్రివ్యూ", veg: "శాఖాహారం", capture: "క్యాప్చర్ చేసి షేర్ చేయండి", loading: "లోడ్ అవుతోంది...", suffix: "_te" }
-  };
-
   const CATEGORY_LABELS = {
-    all: { en: 'All', kn: 'ಎಲ್ಲವೂ', ml: 'എല്ലാം', ta: 'அனைத்தும்', te: 'అన్నీ', jp: 'すべて' },
-    starter: { en: 'Starters', kn: 'ಆರಂಭಿಕಗಳು', ml: 'സ്റ്റാർട്ടറുകൾ', ta: 'துவக்கிகள்', te: 'ప్రారంభకాలు', jp: 'スターター' },
-    ramen: { en: 'Ramen', kn: 'ರಾಮೆನ್', ml: 'രാമെൻ', ta: 'ராமன்', te: 'రామెన్', jp: 'ラーメン' },
-    sushi: { en: 'Sushi', kn: 'ಸುಶಿ', ml: 'സുഷി', ta: 'சுஷி', te: 'సుషీ', jp: '寿司' },
-    rice: { en: 'Mains', kn: 'ಮುಖ್ಯ ಆಹಾರ', ml: 'പ്രധാന ഭക്ഷണം', ta: 'முக்கிய உணவு', te: 'ప్రధాన వంటకాలు', jp: 'メイン' },
-    drinks: { en: 'Desserts & Drinks', kn: 'ಪಾನೀಯಗಳು', ml: 'പാനീയങ്ങൾ', ta: 'பானங்கள்', te: 'పానీయాలు', jp: 'デザートとドリンク' }
+    all: 'All', starter: 'Starters', ramen: 'Ramen',
+    sushi: 'Sushi', rice: 'Mains', drinks: 'Desserts & Drinks',
   };
-
-  let allDishes = [];
-  let rawRows = [];
-  let activeCategory = 'all';
-  let currentLang = 'en';
 
   // ─────────────────────────────────────────────────────────────
-  //  CSV PARSER
+  //  CSV PARSER (handles quoted fields with commas)
   // ─────────────────────────────────────────────────────────────
   function parseCSV(text) {
     const lines = text.trim().split('\n');
@@ -600,44 +585,43 @@
   }
 
   // ─────────────────────────────────────────────────────────────
-  //  NORMALISE ROW → dish object with Multi-Lang support
+  //  NORMALISE ROW → dish object
   // ─────────────────────────────────────────────────────────────
   function rowToDish(row) {
     const truthy = v => ['true','yes','1'].includes((v||'').toLowerCase());
-    
-    const getVal = (baseField) => {
-      const langSuffix = translations[currentLang].suffix;
-      return row[baseField + langSuffix] || row[baseField] || '';
-    };
-
-    const name = getVal('name');
-    const emoji = EMOJI_MAP[row['name'] ? row['name'].toLowerCase() : ''] || '🍽️';
-
+    const name   = row['name'] || row['dish name'] || '';
+    const emoji  = EMOJI_MAP[name.toLowerCase()] || '🍽️';
     return {
       id:          row['id']       || '',
       name,
       category:    (row['category']|| row['cat'] || 'other').toLowerCase(),
-      jp:          row['name_jp']  || row['jp_name'] || '',
-      desc:        getVal('description') || getVal('desc'),
+      jp:          row['jp_name']  || row['jp name'] || '',
+      desc:        row['description'] || '',
       price:       parseInt(row['price'] || '0', 10),
       veg:         truthy(row['veg']),
       dotd:        truthy(row['dish of the day'] || row['dotd']),
       isNew:       truthy(row['new']),
       available:   truthy(row['available']),
       glb:         row['glb_url']  || row['glb url'] || '',
-      scale:       parseFloat(row['scale'] || '0.22') || 0.22,
+      scale:       parseFloat(row['scale'] || row['Scale'] || '0.22') || 0.22,
       emoji,
     };
   }
 
   // ─────────────────────────────────────────────────────────────
-  //  RENDER LOGIC
+  //  STATE
+  // ─────────────────────────────────────────────────────────────
+  let allDishes = [];
+  let activeCategory = 'all';
+
+  // ─────────────────────────────────────────────────────────────
+  //  RENDER TABS
   // ─────────────────────────────────────────────────────────────
   function renderTabs(dishes) {
     const cats = ['all', ...new Set(dishes.map(d => d.category))];
     const wrap = document.getElementById('tabs-inner');
     wrap.innerHTML = cats.map(c => {
-      const label = CATEGORY_LABELS[c] ? CATEGORY_LABELS[c][currentLang] : c;
+      const label = CATEGORY_LABELS[c] || (c.charAt(0).toUpperCase() + c.slice(1));
       return `<button class="tab-btn${c === activeCategory ? ' active' : ''}" data-cat="${c}">${label}</button>`;
     }).join('');
     wrap.querySelectorAll('.tab-btn').forEach(btn => {
@@ -649,9 +633,12 @@
     });
   }
 
+  // ─────────────────────────────────────────────────────────────
+  //  RENDER ITEMS
+  // ─────────────────────────────────────────────────────────────
   function tagHTML(d) {
     return [
-      d.veg   ? `<span class="tag tag-veg">🌿 ${translations[currentLang].veg}</span>` : '',
+      d.veg   ? '<span class="tag tag-veg">🌿 veg</span>' : '',
       d.isNew ? '<span class="tag tag-new">new</span>' : '',
       d.dotd  ? '<span class="tag tag-dotd">★ chef\'s pick</span>' : '',
     ].join('');
@@ -664,6 +651,7 @@
 
     const container = document.getElementById('items-container');
 
+    // Group by category if "All" tab
     if (activeCategory === 'all') {
       const grouped = {};
       filtered.forEach(d => {
@@ -672,7 +660,7 @@
       });
 
       container.innerHTML = Object.entries(grouped).map(([cat, items]) => {
-        const label = CATEGORY_LABELS[cat] ? CATEGORY_LABELS[cat][currentLang] : cat;
+        const label = CATEGORY_LABELS[cat] || (cat.charAt(0).toUpperCase() + cat.slice(1));
         return `
           <div class="section-label"><span></span>${label}<span></span></div>
           <div class="items-grid">${items.map(cardHTML).join('')}</div>
@@ -684,6 +672,9 @@
 
     container.querySelectorAll('.menu-card').forEach(card => {
       card.addEventListener('click', () => openModal(card.dataset.id));
+    });
+    container.querySelectorAll('.ar-btn').forEach(btn => {
+      btn.addEventListener('click', e => { e.stopPropagation(); openModal(btn.dataset.id); });
     });
   }
 
@@ -698,6 +689,7 @@
           <div class="card-body">
             <div class="name-row">
               <span class="dish-name">${d.name}</span>
+              ${d.jp ? `<span class="dish-jp">${d.jp}</span>` : ''}
             </div>
             <div class="tags-row">${tagHTML(d)}</div>
             <p class="dish-desc">${d.desc}</p>
@@ -706,7 +698,7 @@
               ${d.glb
                 ? `<button class="ar-btn" data-id="${d.id}" aria-label="View ${d.name} in 3D">
                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-                     AR
+                     View in AR
                    </button>`
                 : ''}
             </div>
@@ -716,7 +708,7 @@
   }
 
   // ─────────────────────────────────────────────────────────────
-  //  MODAL & AR LOGIC
+  //  MODAL
   // ─────────────────────────────────────────────────────────────
   function openModal(id) {
     const d = allDishes.find(x => x.id === id);
@@ -731,28 +723,66 @@
     document.getElementById('modal-tags2').innerHTML  = tagHTML(d);
 
     const viewerWrap = document.getElementById('modal-viewer-wrap');
+    // Clear old model-viewer
     const oldMV = viewerWrap.querySelector('model-viewer');
     if (oldMV) oldMV.remove();
 
     if (d.glb) {
-      const mv = document.createElement('model-viewer');
-      mv.setAttribute('src', d.glb);
-      mv.setAttribute('ar', '');
-      mv.setAttribute('ar-modes', 'webxr quick-look scene-viewer');
-      mv.setAttribute('ar-placement', 'floor');
+      // --- UPDATED AR CONFIGURATION ---
+const mv = document.createElement('model-viewer');
+mv.setAttribute('src', d.glb);
+mv.setAttribute('ar', '');
+// 1. Prioritize WebXR for better environment tracking
+mv.setAttribute('ar-modes', 'webxr quick-look scene-viewer'); 
+mv.setAttribute('ar-placement', 'floor');
+mv.setAttribute('ar-scale', 'fixed');
+
+// 2. Add Shadow Intensity to help "ground" the object visually
+mv.setAttribute('shadow-intensity', '1.5');
+mv.setAttribute('shadow-softness', '1');
+
+// 3. Environment lighting helps the model blend with the room
+mv.setAttribute('environment-image', 'neutral'); 
+mv.setAttribute('exposure', '1');
+
+// 4. Camera settings for the 3D preview modal
+mv.setAttribute('camera-controls', '');
+mv.setAttribute('auto-rotate', '');
+
+      // ── FIX 1: Lock physical size in AR ───────────────────────
+      // ar-scale="fixed" tells WebXR not to rescale the model —
+      // it will always appear at the size set by the scale attribute.
+      // scale="0.25 0.25 0.25" = ~25 cm plate (1 GLTF unit = 1 metre).
+      // Adjust scale value if your GLB is already at real-world size:
+      //   real-world-scale GLB  → use scale="1 1 1"
+      //   oversized GLB (e.g. 1 unit = 1 cm) → use scale="0.01 0.01 0.01"
       mv.setAttribute('ar-scale', 'fixed');
-      mv.setAttribute('shadow-intensity', '1.5');
-      mv.setAttribute('shadow-softness', '1');
-      mv.setAttribute('environment-image', 'neutral');
-      mv.setAttribute('exposure', '1');
-      mv.setAttribute('camera-controls', '');
-      mv.setAttribute('auto-rotate', '');
-      
       const s = d.scale;
       mv.setAttribute('scale', `${s} ${s} ${s}`);
-      
-      mv.style.cssText = 'width:100%;height:100%;background:transparent;';
+
+      // ── FIX 2: Anchor model to surface, stop camera-tracking ──
+      // ar-placement="floor" anchors to a detected horizontal surface
+      // (table, countertop) so the model stays put when you move the camera.
+      // camera-orbit locks the 3D preview to a stable angle so the dish
+      // doesn't drift in the modal viewer either.
+      mv.setAttribute('ar-placement', 'floor');
+      mv.setAttribute('xr-environment', '');
+      mv.setAttribute('camera-orbit', '0deg 75deg 1.5m');
+      mv.setAttribute('min-camera-orbit', 'auto 10deg auto');
+      mv.setAttribute('max-camera-orbit', 'auto 90deg auto');
+
+      // ── Prevent touch-events leaking into page scroll during AR ─
+      mv.setAttribute('interaction-prompt', 'none');
+      mv.setAttribute('touch-action', 'none');
+
+      mv.style.cssText = 'width:100%;height:280px;background:transparent;';
       viewerWrap.insertBefore(mv, viewerWrap.querySelector('.viewer-hint'));
+    } else {
+      // No GLB — show emoji placeholder
+      const ph = document.createElement('div');
+      ph.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:280px;gap:8px;';
+      ph.innerHTML = `<span style="font-size:64px">${d.emoji}</span><span style="font-size:11px;letter-spacing:1px;color:rgba(255,255,255,0.35)">3D model not available</span>`;
+      viewerWrap.insertBefore(ph, viewerWrap.querySelector('.viewer-hint'));
     }
 
     document.getElementById('modal-overlay').classList.add('open');
@@ -762,67 +792,47 @@
   function closeModal() {
     document.getElementById('modal-overlay').classList.remove('open');
     document.body.style.overflow = '';
+    // Pause any playing model
+    const mv = document.querySelector('#modal-viewer-wrap model-viewer');
+    if (mv) mv.pause();
   }
 
   document.getElementById('modal-close').addEventListener('click', closeModal);
-
-  // ─────────────────────────────────────────────────────────────
-  //  UI ACTIONS
-  // ─────────────────────────────────────────────────────────────
-  document.getElementById('lang-select').addEventListener('change', (e) => {
-    currentLang = e.target.value;
-    const t = translations[currentLang];
-    document.getElementById('ui-sub-tag').textContent = t.sub;
-    document.getElementById('ui-ar-badge').textContent = t.badge;
-    document.getElementById('ar-capture-btn').textContent = "📸 " + t.capture;
-    document.getElementById('ui-loading').textContent = t.loading;
-    
-    processData();
+  document.getElementById('modal-overlay').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-overlay')) closeModal();
   });
-
-  document.getElementById('ar-capture-btn').addEventListener('click', async () => {
-    const mv = document.querySelector('model-viewer');
-    if (!mv) {
-      alert("Please open a 3D model first!");
-      return;
-    }
-    try {
-      const blob = await mv.toBlob({ idealAspect: true });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `Sakura_AR_${Date.now()}.png`;
-      a.click();
-      alert("Photo saved to your gallery!");
-    } catch (err) {
-      console.error("Capture failed", err);
-    }
-  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
   // ─────────────────────────────────────────────────────────────
-  //  INIT
+  //  FETCH & INIT
   // ─────────────────────────────────────────────────────────────
-  function processData() {
-    allDishes = rawRows.map(rowToDish).filter(d => d.name);
-    renderTabs(allDishes);
-    renderItems(allDishes);
-  }
-
   async function init() {
     const loading = document.getElementById('loading-state');
     const container = document.getElementById('items-container');
 
     try {
       const res = await fetch(CSV_URL);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = await res.text();
-      rawRows = parseCSV(text);
-      
+      const rows = parseCSV(text);
+      allDishes = rows.map(rowToDish).filter(d => d.name);
+
+      if (allDishes.length === 0) throw new Error('No dishes found in sheet.');
+
       loading.style.display = 'none';
       container.style.display = 'block';
-      
-      processData();
+      renderTabs(allDishes);
+      renderItems(allDishes);
+
     } catch (err) {
       console.error('Menu load error:', err);
+      loading.innerHTML = `
+        <p style="color:#c0392b;font-weight:500;margin-bottom:8px">Could not load menu data</p>
+        <p style="font-size:13px;line-height:1.6">
+          Make sure your Google Sheet is published:<br>
+          <strong>File → Share → Publish to web → CSV</strong><br><br>
+          Sheet ID in use: <code style="background:#f0e8d8;padding:2px 6px;border-radius:4px;font-size:12px">${SHEET_ID}</code>
+        </p>`;
     }
   }
 
