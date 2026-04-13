@@ -327,7 +327,7 @@ const FALLBACK=[
      ml:'ബോണിറ്റോ ഫ്ലേക്ക്സ്, ടക്കൊയാക്കി സോസ് ചേർത്ത ഒക്ടോപ്പസ് ബോൾ. 6 എണ്ണം.',
      te:'బోనిటో ఫ్లేక్స్ మరియు టకోయాకి సాస్ వేసిన ఆక్టోపస్ బంతులు. 6 ముక్కలు.',
    },
-   price:390,emoji:'🐙',veg:false,chef_pick:false,new:true,available:true,glb_url:''},
+   price:390,emoji:'🐙',veg:false,chef_pick:false,new:true,available:true,glb_url:'3d%20model/Takoyaki/Takoyaki.glb'},
   {id:'g6',name:'Agedashi Tofu',jp:'揚げ出し豆腐',
    names:{hi:'अगेदाशी टोफू',kn:'ಅಗೆದಾಶಿ ಟೋಫು',ta:'அகேடாஷி டோஃபு',ml:'അഗേദാഷി ടോഫു',te:'అగేదాషి టోఫు'},
    category:'Starters',
@@ -605,6 +605,7 @@ function triggerAR(idx) {
   // Desktop fallback
   showToast('📱 Open on your phone to view in AR');
 }
+
 function addToCart(id,cardIdx){
   const item=menuItems.find(i=>i.id===id);if(!item||!item.available)return;
   cart[id]=(cart[id]||0)+1; updateCartUI();
