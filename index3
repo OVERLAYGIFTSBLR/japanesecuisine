@@ -463,120 +463,6 @@
 
     /* ── UNAVAILABLE DIMMING ─────────────────────────── */
     .menu-card.unavailable { opacity: 0.45; pointer-events: none; }
-
-    /* ── SCALE EDITOR ────────────────────────────────── */
-    .scale-editor {
-      margin-top: 18px;
-      border: 1px dashed var(--border-md);
-      border-radius: 12px;
-      padding: 14px 16px 12px;
-      background: rgba(184,134,11,0.04);
-    }
-
-    .scale-header {
-      display: flex;
-      align-items: baseline;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .scale-title {
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--gold);
-    }
-
-    .scale-hint {
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .scale-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .scale-row input[type=range] {
-      flex: 1;
-      accent-color: var(--ink);
-      height: 4px;
-      cursor: pointer;
-    }
-
-    .scale-val {
-      font-family: 'DM Sans', monospace;
-      font-size: 20px;
-      font-weight: 500;
-      color: var(--ink);
-      min-width: 44px;
-      text-align: right;
-    }
-
-    .scale-sizes {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-
-    .scale-preset {
-      flex: 1;
-      min-width: 60px;
-      padding: 6px 4px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--paper);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--ink);
-      cursor: pointer;
-      text-align: center;
-      line-height: 1.4;
-      transition: all 0.15s;
-    }
-
-    .scale-preset span { font-size: 10px; color: var(--muted); font-weight: 400; }
-
-    .scale-preset:hover,
-    .scale-preset.active {
-      background: var(--ink);
-      color: #fff;
-      border-color: var(--ink);
-    }
-
-    .scale-preset.active span { color: rgba(255,255,255,0.6); }
-
-    .scale-copy-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: 10px;
-      border-top: 1px solid var(--border);
-      gap: 10px;
-    }
-
-    .scale-copy-label { font-size: 12px; color: var(--muted); }
-
-    .scale-copy-btn {
-      flex-shrink: 0;
-      padding: 6px 14px;
-      border-radius: 7px;
-      border: 1px solid var(--border-md);
-      background: var(--paper);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px;
-      color: var(--ink);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .scale-copy-btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
-    .scale-copy-btn.copied { background: #2d6a4f; color: #fff; border-color: #2d6a4f; }
   </style>
 </head>
 <body>
@@ -618,29 +504,6 @@
       <div class="modal-footer">
         <div class="modal-price" id="modal-price"></div>
         <div class="tags-row" id="modal-tags2"></div>
-      </div>
-
-      <!-- ── Scale Editor ──────────────────────────────── -->
-      <div class="scale-editor" id="scale-editor">
-        <div class="scale-header">
-          <span class="scale-title">AR Size Tuner</span>
-          <span class="scale-hint">Adjust · copy value to your sheet</span>
-        </div>
-        <div class="scale-row">
-          <input type="range" id="scale-slider" min="0.01" max="1.00" step="0.01" value="0.22" />
-          <span class="scale-val" id="scale-val">0.22</span>
-        </div>
-        <div class="scale-sizes">
-          <button class="scale-preset" data-v="0.08">0.08<br><span>sushi</span></button>
-          <button class="scale-preset" data-v="0.12">0.12<br><span>small bowl</span></button>
-          <button class="scale-preset" data-v="0.18">0.18<br><span>side dish</span></button>
-          <button class="scale-preset" data-v="0.22">0.22<br><span>dinner plate</span></button>
-          <button class="scale-preset" data-v="0.30">0.30<br><span>ramen bowl</span></button>
-        </div>
-        <div class="scale-copy-row">
-          <span class="scale-copy-label">Copy to sheet → Scale column:</span>
-          <button class="scale-copy-btn" id="scale-copy-btn">Copy value</button>
-        </div>
       </div>
     </div>
   </div>
@@ -725,7 +588,6 @@
       isNew:       truthy(row['new']),
       available:   truthy(row['available']),
       glb:         row['glb_url']  || row['glb url'] || '',
-      scale:       parseFloat(row['scale'] || row['Scale'] || '0.22') || 0.22,
       emoji,
     };
   }
@@ -867,8 +729,7 @@
       //   real-world-scale GLB  → use scale="1 1 1"
       //   oversized GLB (e.g. 1 unit = 1 cm) → use scale="0.01 0.01 0.01"
       mv.setAttribute('ar-scale', 'fixed');
-      const s = d.scale;
-      mv.setAttribute('scale', `${s} ${s} ${s}`);
+      mv.setAttribute('scale', '0.25 0.25 0.25');
 
       // ── FIX 2: Anchor model to surface, stop camera-tracking ──
       // ar-placement="floor" anchors to a detected horizontal surface
@@ -897,7 +758,6 @@
 
     document.getElementById('modal-overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
-    initScaleEditor(d.scale);
   }
 
   function closeModal() {
@@ -913,54 +773,6 @@
     if (e.target === document.getElementById('modal-overlay')) closeModal();
   });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-  // ─────────────────────────────────────────────────────────────
-  //  SCALE EDITOR
-  // ─────────────────────────────────────────────────────────────
-  function initScaleEditor(initialScale) {
-    const slider   = document.getElementById('scale-slider');
-    const valLabel = document.getElementById('scale-val');
-    const copyBtn  = document.getElementById('scale-copy-btn');
-    const presets  = document.querySelectorAll('.scale-preset');
-
-    slider.value = initialScale;
-    valLabel.textContent = parseFloat(initialScale).toFixed(2);
-    updatePresetHighlight(initialScale);
-
-    function applyScale(val) {
-      const s = parseFloat(val).toFixed(2);
-      valLabel.textContent = s;
-      slider.value = s;
-      updatePresetHighlight(s);
-      const mv = document.querySelector('#modal-viewer-wrap model-viewer');
-      if (mv) mv.setAttribute('scale', `${s} ${s} ${s}`);
-    }
-
-    function updatePresetHighlight(val) {
-      const s = parseFloat(val).toFixed(2);
-      presets.forEach(b => {
-        b.classList.toggle('active', parseFloat(b.dataset.v).toFixed(2) === s);
-      });
-    }
-
-    slider.oninput = () => applyScale(slider.value);
-
-    presets.forEach(btn => {
-      btn.onclick = () => applyScale(btn.dataset.v);
-    });
-
-    copyBtn.onclick = () => {
-      const val = valLabel.textContent;
-      navigator.clipboard.writeText(val).then(() => {
-        copyBtn.textContent = `✓ Copied ${val}`;
-        copyBtn.classList.add('copied');
-        setTimeout(() => {
-          copyBtn.textContent = 'Copy value';
-          copyBtn.classList.remove('copied');
-        }, 2000);
-      });
-    };
-  }
 
   // ─────────────────────────────────────────────────────────────
   //  FETCH & INIT
