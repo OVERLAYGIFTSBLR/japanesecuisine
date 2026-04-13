@@ -568,20 +568,43 @@ function initScrollArea(){
   document.addEventListener('keydown',e=>{const s=viewH*0.75;if(e.key==='ArrowDown')targetY=Math.min(totalScrollH,targetY+s);if(e.key==='ArrowUp')targetY=Math.max(0,targetY-s);});
 }
 
-// Replace this function:
 function triggerAR(idx) {
   const mv = document.getElementById('mv_' + idx);
   if (!mv) return;
-  
-  // Try activateAR first (mobile)
-  if (mv.canActivateAR) {
-    mv.activateAR();
-  } else {
-    // Fallback: click the built-in AR button inside model-viewer's shadow DOM
-    const arBtn = mv.shadowRoot?.querySelector('button[slot="ar-button"], .ar-button');
-    if (arBtn) arBtn.click();
-    else alert('AR is not supported on this device/browser.');
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isAndroid = /android/i.test(navigator.userAgent);
+
+  if (isIOS) {
+    const item = menuItems[idx];
+    if (!item || !item.glb_url) return;
+    const usdzUrl = item.glb_url.replace('.glb', '.usdz');
+    const a = document.createElement('a');
+    a.setAttribute('rel', 'ar');
+    a.setAttribute('href', usdzUrl);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    return;
   }
+
+  if (isAndroid) {
+    if (mv.canActivateAR) {
+      mv.activateAR();
+    } else {
+      showToast('📱 AR loading… please wait');
+      mv.addEventListener('ar-status', (e) => {
+        if (e.detail.status === 'failed') {
+          showToast('AR not supported on this device');
+        }
+      }, { once: true });
+    }
+    return;
+  }
+
+  // Desktop fallback
+  showToast('📱 Open on your phone to view in AR');
+}
 }
 function addToCart(id,cardIdx){
   const item=menuItems.find(i=>i.id===id);if(!item||!item.available)return;
