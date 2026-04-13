@@ -508,7 +508,7 @@ function buildCards(){
     if(cq>0){const c=card.querySelector('#cartCounter_'+idx);if(c){c.textContent=cq;c.classList.add('show');}}
     if(has3d){
       const mv=card.querySelector('#mv_'+idx),ld=card.querySelector('#loader_'+idx);
-      if(mv&&ld){ld.style.display='flex';mv.addEventListener('load',()=>{ld.style.display='none';},{once:true});setTimeout(()=>{if(ld)ld.style.display='none';},15000);}
+      if(mv&&ld){ld.style.display='flex';mv.addEventListener('load',()=>{ld.style.display='none';},{once:true});setTimeout(()=>{if(ld)ld.style.display='none';},5000);}
     }
   });
 }
