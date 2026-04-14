@@ -343,6 +343,7 @@
       overflow: hidden;
     }
 
+    /* Zoom fully locked — disable-zoom attr + FOV pinned + touch-action blocks pinch */
     model-viewer {
       display: block;
       width: 100%;
@@ -350,6 +351,8 @@
       background: transparent;
       --progress-bar-color: #b8860b;
       --progress-mask: transparent;
+      /* pan-y allows vertical scroll but blocks pinch-zoom on the element */
+      touch-action: pan-y;
     }
 
     .modal-close {
@@ -670,33 +673,31 @@ function openModal(id) {
   if (prev) prev.remove();
 
   if (d.glbPath) {
-  const mv = document.createElement('model-viewer');
-  mv.setAttribute('src', d.glbPath);
+    const mv = document.createElement('model-viewer');
+    mv.setAttribute('src',               d.glbPath);
+    mv.setAttribute('ar',                '');
+    mv.setAttribute('ar-modes',          'webxr scene-viewer quick-look');
+    mv.setAttribute('ar-placement',      'floor');
+    mv.setAttribute('camera-controls',   '');
+    mv.setAttribute('auto-rotate',       '');
+    mv.setAttribute('shadow-intensity',  '1');
+    mv.setAttribute('environment-image', 'neutral');
+    mv.setAttribute('exposure',          '1');
+    mv.setAttribute('loading',           'eager');
 
-  mv.setAttribute('ar', '');
-  mv.setAttribute('ar-modes', 'webxr scene-viewer quick-look');
-  mv.setAttribute('ar-placement', 'floor');
-  mv.setAttribute('camera-controls', '');
-  mv.setAttribute('auto-rotate', '');
-
-  // ✅ ADD THIS BLOCK HERE 👇
-  mv.setAttribute('camera-orbit', '0deg 75deg 1.2m');
-  mv.setAttribute('min-camera-orbit', 'auto auto 1.2m');
-  mv.setAttribute('max-camera-orbit', 'auto auto 1.2m');
-
-  mv.setAttribute('shadow-intensity', '1');
-  mv.setAttribute('environment-image', 'neutral');
-
-    // Apply the scale value directly from the Google Sheet column.
-    // This scales the 3D model uniformly on all axes (X Y Z).
+    // ── Fix 1: Apply real-world scale directly from the sheet column ──
+    // scale value from CSV (e.g. 0.25 means 25 cm).
+    // This sets the physical size of the model in both 3D view and AR.
     const s = d.scale.toFixed(4);
     mv.setAttribute('scale', `${s} ${s} ${s}`);
 
-    // Lock zoom — disable pinch-to-zoom completely
-    mv.setAttribute('disable-zoom',      '');
+    // ── Fix 2: Completely disable pinch-to-zoom ───────────────────────
+    // Lock min and max FOV to the same fixed value so zoom is impossible.
     mv.setAttribute('field-of-view',     '30deg');
     mv.setAttribute('min-field-of-view', '30deg');
     mv.setAttribute('max-field-of-view', '30deg');
+    // disable-zoom removes scroll-wheel & pinch zoom at the API level.
+    mv.setAttribute('disable-zoom',      '');
 
     mv.style.cssText = 'display:block;width:100%;height:300px;background:transparent;';
     vw.insertBefore(mv, vw.querySelector('.viewer-hint'));
