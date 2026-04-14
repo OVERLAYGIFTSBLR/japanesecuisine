@@ -663,13 +663,13 @@ function openAR(id) {
   const mv = document.createElement('model-viewer');
 
   mv.setAttribute('src', d.glbPath);
-  mv.setAttribute('ios-src', d.glbPath.replace('.glb', '.usdz')); // ✅ iPhone support
+  mv.setAttribute('ios-src', d.glbPath.replace('.glb', '.usdz')); // ✅ iPhone
 
   mv.setAttribute('ar', '');
   mv.setAttribute('ar-modes', 'scene-viewer quick-look webxr');
 
-  mv.setAttribute('ar-scale', 'fixed');     // 🔒 fixed size
-  mv.setAttribute('ar-placement', 'floor'); // 📍 table placement
+  mv.setAttribute('ar-scale', 'fixed');
+  mv.setAttribute('ar-placement', 'floor');
 
   mv.setAttribute('shadow-intensity', '1');
   mv.setAttribute('environment-image', 'neutral');
@@ -677,9 +677,9 @@ function openAR(id) {
   mv.style.display = 'none';
   document.body.appendChild(mv);
 
-  mv.addEventListener('load', () => {
-    mv.activateAR();
-  });
+  mv.addEventListener('model-visibility', () => {
+  mv.activateAR();
+});
 }
 
 // ── openModal ──────────────────────────────────────────────────
@@ -801,24 +801,7 @@ async function init() {
 }
 
 init();
-function openAR(id) {
-  const d = allDishes.find(x => x.id === id);
-  if (!d || !d.glbPath) return;
 
-  const mv = document.createElement('model-viewer');
-
-  mv.setAttribute('src', d.glbPath);
-  mv.setAttribute('ar', '');
-  mv.setAttribute('ar-modes', 'scene-viewer quick-look webxr');
-  mv.setAttribute('ar-scale', 'fixed'); // 🔒 fixed size
-  mv.setAttribute('ar-placement', 'floor');
-
-  // trigger AR instantly
-  mv.style.display = 'none';
-  document.body.appendChild(mv);
-
-  mv.activateAR();
-}
 </script>
 </body>
 </html>
