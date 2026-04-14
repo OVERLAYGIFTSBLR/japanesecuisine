@@ -677,12 +677,14 @@ function openModal(id) {
   mv.setAttribute('ar-modes', 'webxr scene-viewer quick-look');
   mv.setAttribute('ar-placement', 'floor');
   mv.setAttribute('camera-controls', '');
-  mv.setAttribute('auto-rotate', '');
+mv.setAttribute('touch-action', 'pan-y');
 
-  // ✅ ADD THIS BLOCK HERE 👇
-  mv.setAttribute('camera-orbit', '0deg 75deg 1.2m');
-  mv.setAttribute('min-camera-orbit', 'auto auto 1.2m');
-  mv.setAttribute('max-camera-orbit', 'auto auto 1.2m');
+mv.setAttribute('camera-orbit', '0deg 75deg 1.2m');
+mv.setAttribute('min-camera-orbit', '0deg 75deg 1.2m');
+mv.setAttribute('max-camera-orbit', '0deg 75deg 1.2m');
+
+mv.setAttribute('interaction-prompt', 'none');
+mv.setAttribute('ar-scale', 'fixed');
 
   mv.setAttribute('shadow-intensity', '1');
   mv.setAttribute('environment-image', 'neutral');
@@ -693,7 +695,7 @@ function openModal(id) {
     mv.setAttribute('scale', `${s} ${s} ${s}`);
 
     // Lock zoom — disable pinch-to-zoom completely
-    mv.setAttribute('disable-zoom',      '');
+    mv.setAttribute('interaction-prompt', 'none');
     mv.setAttribute('field-of-view',     '30deg');
     mv.setAttribute('min-field-of-view', '30deg');
     mv.setAttribute('max-field-of-view', '30deg');
