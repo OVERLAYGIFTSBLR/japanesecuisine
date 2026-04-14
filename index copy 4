@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
 
+  <!-- model-viewer: AR + 3D on Android (WebXR/SceneViewer) and iOS (Quick Look) -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
   <style>
@@ -350,10 +351,10 @@
     }
 
     /*
-      ZOOM LOCKED: min-field-of-view and max-field-of-view are set
-      to the same computed value per dish (from the sheet's scale column),
-      so users cannot pinch/scroll to resize the model.
-      Rotation (drag) is still allowed via camera-controls.
+      model-viewer MUST be display:block with explicit height.
+      --progress-bar-color matches brand gold.
+      The component renders its own native AR button when AR is
+      available on device — we never call activateAR() from JS.
     */
     model-viewer {
       display: block;
@@ -362,7 +363,6 @@
       background: transparent;
       --progress-bar-color: #b8860b;
       --progress-mask: transparent;
-      touch-action: pan-y; /* allows page scroll but blocks pinch-zoom passthrough */
     }
 
     .modal-close {
@@ -474,8 +474,7 @@
   <div class="modal-card">
     <div class="modal-viewer-wrap" id="modal-viewer-wrap">
       <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
-      <!-- UPDATED: removed "pinch to zoom" since zoom is now locked -->
-      <span class="viewer-hint">drag to rotate</span>
+      <span class="viewer-hint">drag to rotate · pinch to zoom</span>
     </div>
     <div class="modal-body">
       <h2 class="modal-name" id="modal-name"></h2>
@@ -504,6 +503,7 @@ const SHEET_ID  = '1QAReLCzWLQEfNyY9V6Cg5VbGPqmbXh4XCZ_RCQSRlz0';
 const SHEET_GID = '0';
 const CSV_URL   = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
 
+// Keys MUST match the sheet "name" column exactly (lowercase).
 const EMOJI_MAP = {
   'gyoza':            '🥟',
   'edamame':          '🫘',
@@ -514,7 +514,7 @@ const EMOJI_MAP = {
   'ramen':            '🍜',
   'salmon sashimi':   '🐟',
   'tempura':          '🍤',
-  'matcha ice cream': '🍦',
+  'matcha ice cream': '🍦',  // FIX: was 'matcha-ice-cream' (dashes) — now matches sheet
 };
 
 const I18N = {
@@ -544,7 +544,7 @@ let activeCategory = 'all';
 let currentLang    = 'en';
 
 // ─────────────────────────────────────────────────────────────
-//  CSV PARSER
+//  CSV PARSER  (handles quoted fields containing commas)
 // ─────────────────────────────────────────────────────────────
 function parseCSV(text) {
   const lines = text.trim().split('\n');
@@ -573,8 +573,14 @@ function splitLine(line) {
 
 // ─────────────────────────────────────────────────────────────
 //  ROW → DISH
-//  CHANGE: reads 'scale' column and stores it on the dish object.
-//  scale is a float (e.g. 0.22, 0.8, 2.0) from the sheet.
+//
+//  GLB path fix:
+//  The sheet stores:  3d%20model/Gyoza/Gyoza.glb
+//  decodeURIComponent turns that into: 3d model/Gyoza/Gyoza.glb
+//  The browser then resolves it relative to index.html — which is
+//  exactly what we need when hosted on GitHub Pages alongside the
+//  "3d model/" folder.
+//  We do NOT replace spaces with dashes or any other transform.
 // ─────────────────────────────────────────────────────────────
 function rowToDish(row) {
   const truthy = v => ['true','yes','1'].includes((v || '').toLowerCase());
@@ -583,11 +589,9 @@ function rowToDish(row) {
   const desc = row[`description${sfx}`] || row['description'] || '';
   const name = row[`name${sfx}`]        || row['name']        || '';
 
+  // Decode percent-encoded path from sheet, keep spaces as spaces.
   const rawGlb  = (row['glb_url'] || '').trim();
   const glbPath = rawGlb ? decodeURIComponent(rawGlb) : '';
-
-  // CHANGE: parse scale from sheet; default to 1 if missing/invalid
-  const scale = parseFloat(row['scale'] || '1') || 1;
 
   return {
     id:        row['id']       || '',
@@ -601,7 +605,6 @@ function rowToDish(row) {
     isNew:     truthy(row['new']),
     available: truthy(row['available']),
     glbPath,
-    scale,      // CHANGE: added scale
     emoji:     EMOJI_MAP[(row['name'] || '').toLowerCase()] || '🍽️',
   };
 }
@@ -692,16 +695,17 @@ function renderItems() {
 // ─────────────────────────────────────────────────────────────
 //  MODAL
 //
-//  CHANGE: Fixed scale from sheet's 'scale' column.
-//  field-of-view is computed as (1 / scale) * 30 degrees.
-//  Both min-field-of-view and max-field-of-view are set to the
-//  SAME value — this completely locks zoom. Users can only rotate.
-//
-//  Scale examples from your sheet:
-//    scale 0.22  →  FOV ~136°  (small dish, appears realistic size)
-//    scale 0.8   →  FOV ~37.5° (medium dish)
-//    scale 0.9   →  FOV ~33°   (slightly larger)
-//    scale 2.0   →  FOV ~15°   (large item, fills frame)
+//  AR implementation notes:
+//  • src = decoded relative path  ("3d model/Gyoza/Gyoza.glb")
+//  • ar-modes = "webxr scene-viewer quick-look"
+//      – webxr       → Chrome on Android (immersive AR)
+//      – scene-viewer→ Google Scene Viewer fallback on Android
+//      – quick-look  → Safari / iOS AR Quick Look
+//  • We do NOT call mv.activateAR() — it throws on desktop and
+//    is unreliable. model-viewer shows its own AR button on
+//    supported devices automatically.
+//  • ios-src (USDZ): uncomment if you have .usdz files next to
+//    the .glb files.  Quick Look on iOS will use them directly.
 // ─────────────────────────────────────────────────────────────
 function openModal(id) {
   const d = allDishes.find(x => x.id === id);
@@ -722,7 +726,7 @@ function openModal(id) {
   if (d.glbPath) {
     const mv = document.createElement('model-viewer');
     mv.setAttribute('src',          d.glbPath);
-    // Uncomment if you have .usdz files alongside .glb:
+    // Uncomment next line if you have .usdz files alongside .glb:
     // mv.setAttribute('ios-src', d.glbPath.replace(/\.glb$/i, '.usdz'));
     mv.setAttribute('ar',           '');
     mv.setAttribute('ar-modes',     'webxr scene-viewer quick-look');
@@ -733,15 +737,6 @@ function openModal(id) {
     mv.setAttribute('environment-image', 'neutral');
     mv.setAttribute('exposure',     '1');
     mv.setAttribute('loading',      'eager');
-
-    // ── CHANGE: FIXED SCALE — lock zoom using sheet's scale value ──
-    // FOV is inversely proportional to scale so bigger scale = tighter zoom
-    const fov = ((1 / d.scale) * 30).toFixed(1);
-    mv.setAttribute('field-of-view',     `${fov}deg`);
-    mv.setAttribute('min-field-of-view', `${fov}deg`); // locks zoom out
-    mv.setAttribute('max-field-of-view', `${fov}deg`); // locks zoom in
-    // ── END CHANGE ──
-
     mv.style.cssText = 'display:block;width:100%;height:300px;background:transparent;';
     vw.insertBefore(mv, vw.querySelector('.viewer-hint'));
   } else {
@@ -760,6 +755,7 @@ function openModal(id) {
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('open');
   document.body.style.overflow = '';
+  // Remove model-viewer completely to stop streaming / free memory
   const mv = document.querySelector('#modal-viewer-wrap model-viewer');
   if (mv) mv.remove();
 }
