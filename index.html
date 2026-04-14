@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
 
+  <!-- model-viewer: AR + 3D on Android (WebXR/SceneViewer) and iOS (Quick Look) -->
   <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 
   <style>
@@ -39,6 +40,7 @@
       min-height: 100vh;
     }
 
+    /* ── HEADER ─────────────────────────────────────── */
     .site-header {
       background: var(--ink);
       color: #fff;
@@ -107,6 +109,7 @@
 
     @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.35;transform:scale(0.8)} }
 
+    /* ── LANGUAGE PICKER ─────────────────────────────── */
     #language-picker { position: relative; z-index: 10; margin-bottom: 16px; }
 
     #lang-select {
@@ -123,6 +126,7 @@
 
     #lang-select option { background: #1a1208; color: white; }
 
+    /* ── STICKY TABS ─────────────────────────────────── */
     .tabs-wrap {
       position: sticky;
       top: 0;
@@ -161,6 +165,7 @@
     .tab-btn:hover { border-color: var(--border-md); color: var(--ink); }
     .tab-btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
 
+    /* ── MAIN ────────────────────────────────────────── */
     .main { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
 
     .state-box { text-align: center; padding: 4rem 1rem; color: var(--muted); }
@@ -191,6 +196,7 @@
 
     .section-label span { flex: 1; height: 1px; background: var(--border); }
 
+    /* ── CARDS ───────────────────────────────────────── */
     .items-grid { display: flex; flex-direction: column; gap: 10px; }
 
     .menu-card {
@@ -300,6 +306,7 @@
     .ar-btn:hover { opacity: 0.78; }
     .ar-btn svg { width: 13px; height: 13px; flex-shrink: 0; }
 
+    /* ── MODAL ───────────────────────────────────────── */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -343,6 +350,12 @@
       overflow: hidden;
     }
 
+    /*
+      model-viewer MUST be display:block with explicit height.
+      --progress-bar-color matches brand gold.
+      The component renders its own native AR button when AR is
+      available on device — we never call activateAR() from JS.
+    */
     model-viewer {
       display: block;
       width: 100%;
@@ -405,6 +418,7 @@
 
     .modal-price { font-family: 'Playfair Display', serif; font-size: 30px; }
 
+    /* ── FOOTER ──────────────────────────────────────── */
     .site-footer {
       text-align: center;
       padding: 1.5rem 1rem;
@@ -420,6 +434,7 @@
 </head>
 <body>
 
+<!-- ═══════════════════ HEADER ═══════════════════════ -->
 <header class="site-header">
   <div id="language-picker">
     <select id="lang-select">
@@ -440,10 +455,12 @@
   </span>
 </header>
 
+<!-- ═══════════════════ TABS ════════════════════════ -->
 <nav class="tabs-wrap" aria-label="Menu categories">
   <div class="tabs-inner" id="tabs-inner"></div>
 </nav>
 
+<!-- ═══════════════════ MAIN ════════════════════════ -->
 <main class="main">
   <div class="state-box" id="loading-state">
     <div class="spinner"></div>
@@ -452,11 +469,12 @@
   <div id="items-container" style="display:none"></div>
 </main>
 
+<!-- ═══════════════════ MODAL ════════════════════════ -->
 <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-label="Dish detail">
   <div class="modal-card">
     <div class="modal-viewer-wrap" id="modal-viewer-wrap">
       <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
-      <span class="viewer-hint">drag to rotate</span>
+      <span class="viewer-hint">drag to rotate · pinch to zoom</span>
     </div>
     <div class="modal-body">
       <h2 class="modal-name" id="modal-name"></h2>
@@ -471,16 +489,21 @@
   </div>
 </div>
 
+<!-- ═══════════════════ FOOTER ═══════════════════════ -->
 <footer class="site-footer">
   Tap any dish to view in 3D &nbsp;·&nbsp; Prices in ₹ &nbsp;·&nbsp; 🌿 Vegetarian friendly<br>
   <span style="opacity:0.5">AR requires a compatible mobile device</span>
 </footer>
 
 <script>
+// ─────────────────────────────────────────────────────────────
+//  CONFIG
+// ─────────────────────────────────────────────────────────────
 const SHEET_ID  = '1QAReLCzWLQEfNyY9V6Cg5VbGPqmbXh4XCZ_RCQSRlz0';
 const SHEET_GID = '0';
 const CSV_URL   = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}`;
 
+// Keys MUST match the sheet "name" column exactly (lowercase).
 const EMOJI_MAP = {
   'gyoza':            '🥟',
   'edamame':          '🫘',
@@ -491,7 +514,7 @@ const EMOJI_MAP = {
   'ramen':            '🍜',
   'salmon sashimi':   '🐟',
   'tempura':          '🍤',
-  'matcha ice cream': '🍦',
+  'matcha ice cream': '🍦',  // FIX: was 'matcha-ice-cream' (dashes) — now matches sheet
 };
 
 const I18N = {
@@ -512,11 +535,17 @@ const CAT_LABELS = {
   drinks:  { en:'Desserts',   jp:'デザート',   kn:'ಸಿಹಿತಿಂಡಿಗಳು', ta:'இனிப்புகள்',    ml:'ഡെസേർട്ടുകൾ',    te:'తీపి వంటకాలు' },
 };
 
+// ─────────────────────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────────────────────
 let allDishes      = [];
 let rawRows        = [];
 let activeCategory = 'all';
 let currentLang    = 'en';
 
+// ─────────────────────────────────────────────────────────────
+//  CSV PARSER  (handles quoted fields containing commas)
+// ─────────────────────────────────────────────────────────────
 function parseCSV(text) {
   const lines = text.trim().split('\n');
   if (lines.length < 2) return [];
@@ -542,9 +571,17 @@ function splitLine(line) {
   return result;
 }
 
-// ── rowToDish ──────────────────────────────────────────────────
-// FIX: single 'scale' declaration only — removed the duplicate
-// that was incorrectly placed at the very top of the function.
+// ─────────────────────────────────────────────────────────────
+//  ROW → DISH
+//
+//  GLB path fix:
+//  The sheet stores:  3d%20model/Gyoza/Gyoza.glb
+//  decodeURIComponent turns that into: 3d model/Gyoza/Gyoza.glb
+//  The browser then resolves it relative to index.html — which is
+//  exactly what we need when hosted on GitHub Pages alongside the
+//  "3d model/" folder.
+//  We do NOT replace spaces with dashes or any other transform.
+// ─────────────────────────────────────────────────────────────
 function rowToDish(row) {
   const truthy = v => ['true','yes','1'].includes((v || '').toLowerCase());
 
@@ -552,10 +589,9 @@ function rowToDish(row) {
   const desc = row[`description${sfx}`] || row['description'] || '';
   const name = row[`name${sfx}`]        || row['name']        || '';
 
+  // Decode percent-encoded path from sheet, keep spaces as spaces.
   const rawGlb  = (row['glb_url'] || '').trim();
   const glbPath = rawGlb ? decodeURIComponent(rawGlb) : '';
-
-  const scale = parseFloat(row['scale'] || '1') || 1;
 
   return {
     id:        row['id']       || '',
@@ -569,11 +605,13 @@ function rowToDish(row) {
     isNew:     truthy(row['new']),
     available: truthy(row['available']),
     glbPath,
-    scale,
     emoji:     EMOJI_MAP[(row['name'] || '').toLowerCase()] || '🍽️',
   };
 }
 
+// ─────────────────────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────────────────────
 function tagHTML(d) {
   const t = I18N[currentLang] || I18N.en;
   return [
@@ -588,6 +626,9 @@ function catLabel(cat) {
   return map ? (map[currentLang] || map.en) : (cat.charAt(0).toUpperCase() + cat.slice(1));
 }
 
+// ─────────────────────────────────────────────────────────────
+//  RENDER TABS
+// ─────────────────────────────────────────────────────────────
 function renderTabs() {
   const cats = ['all', ...new Set(allDishes.map(d => d.category))];
   const wrap = document.getElementById('tabs-inner');
@@ -599,6 +640,9 @@ function renderTabs() {
   );
 }
 
+// ─────────────────────────────────────────────────────────────
+//  RENDER ITEMS
+// ─────────────────────────────────────────────────────────────
 const SVG_CUBE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>`;
 
 function cardHTML(d) {
@@ -640,49 +684,29 @@ function renderItems() {
     container.innerHTML = `<div class="items-grid">${filtered.map(cardHTML).join('')}</div>`;
   }
 
-  // ✅ DIRECT AR ON CARD CLICK (MAIN FIX)
   container.querySelectorAll('.menu-card').forEach(card =>
-    card.addEventListener('click', () => openAR(card.dataset.id))
+    card.addEventListener('click', () => openModal(card.dataset.id))
   );
-
-  // keep button also working
   container.querySelectorAll('.ar-btn').forEach(btn =>
-    btn.addEventListener('click', e => { 
-      e.stopPropagation(); 
-      openAR(btn.dataset.id); 
-    })
+    btn.addEventListener('click', e => { e.stopPropagation(); openModal(btn.dataset.id); })
   );
 }
 
-
-/* 🔥 CLEAN AR FUNCTION (UPGRADED) */
-function openAR(id) {
-  const d = allDishes.find(x => x.id === id);
-  if (!d || !d.glbPath) return;
-
-  const mv = document.createElement('model-viewer');
-
-  mv.setAttribute('src', d.glbPath);
-  mv.setAttribute('ios-src', d.glbPath.replace('.glb', '.usdz'));
-
-  mv.setAttribute('ar', '');
-  mv.setAttribute('ar-modes', 'scene-viewer quick-look webxr');
-
-  mv.setAttribute('ar-scale', 'fixed');
-  mv.setAttribute('ar-placement', 'floor');
-
-  mv.style.display = 'none';
-  document.body.appendChild(mv);
-
-  // ✅ MOST RELIABLE TRIGGER
-  mv.activateAR();
-}
-
-// ── openModal ──────────────────────────────────────────────────
-// FIX: removed the fov/mv.setAttribute lines that were incorrectly
-// placed at the very top before 'd' and 'mv' were defined.
-// They now sit correctly inside the if (d.glbPath) block,
-// after 'mv' has been created.
+// ─────────────────────────────────────────────────────────────
+//  MODAL
+//
+//  AR implementation notes:
+//  • src = decoded relative path  ("3d model/Gyoza/Gyoza.glb")
+//  • ar-modes = "webxr scene-viewer quick-look"
+//      – webxr       → Chrome on Android (immersive AR)
+//      – scene-viewer→ Google Scene Viewer fallback on Android
+//      – quick-look  → Safari / iOS AR Quick Look
+//  • We do NOT call mv.activateAR() — it throws on desktop and
+//    is unreliable. model-viewer shows its own AR button on
+//    supported devices automatically.
+//  • ios-src (USDZ): uncomment if you have .usdz files next to
+//    the .glb files.  Quick Look on iOS will use them directly.
+// ─────────────────────────────────────────────────────────────
 function openModal(id) {
   const d = allDishes.find(x => x.id === id);
   if (!d) return;
@@ -700,36 +724,19 @@ function openModal(id) {
   if (prev) prev.remove();
 
   if (d.glbPath) {
-  const mv = document.createElement('model-viewer');
-  mv.setAttribute('src', d.glbPath);
-
-  mv.setAttribute('ar', '');
-  mv.setAttribute('ar-modes', 'webxr scene-viewer quick-look');
-  mv.setAttribute('ar-placement', 'floor');
-  mv.setAttribute('camera-controls', '');
-mv.setAttribute('touch-action', 'pan-y');
-
-mv.setAttribute('camera-orbit', '0deg 75deg 1.2m');
-mv.setAttribute('min-camera-orbit', '0deg 75deg 1.2m');
-mv.setAttribute('max-camera-orbit', '0deg 75deg 1.2m');
-
-mv.setAttribute('interaction-prompt', 'none');
-mv.setAttribute('ar-scale', 'fixed');
-
-  mv.setAttribute('shadow-intensity', '1');
-  mv.setAttribute('environment-image', 'neutral');
-
-    // Apply the scale value directly from the Google Sheet column.
-    // This scales the 3D model uniformly on all axes (X Y Z).
-    const s = d.scale.toFixed(4);
-    mv.setAttribute('scale', `${s} ${s} ${s}`);
-
-    // Lock zoom — disable pinch-to-zoom completely
-    mv.setAttribute('interaction-prompt', 'none');
-    mv.setAttribute('field-of-view',     '30deg');
-    mv.setAttribute('min-field-of-view', '30deg');
-    mv.setAttribute('max-field-of-view', '30deg');
-
+    const mv = document.createElement('model-viewer');
+    mv.setAttribute('src',          d.glbPath);
+    // Uncomment next line if you have .usdz files alongside .glb:
+    // mv.setAttribute('ios-src', d.glbPath.replace(/\.glb$/i, '.usdz'));
+    mv.setAttribute('ar',           '');
+    mv.setAttribute('ar-modes',     'webxr scene-viewer quick-look');
+    mv.setAttribute('ar-placement', 'floor');
+    mv.setAttribute('camera-controls', '');
+    mv.setAttribute('auto-rotate',  '');
+    mv.setAttribute('shadow-intensity', '1');
+    mv.setAttribute('environment-image', 'neutral');
+    mv.setAttribute('exposure',     '1');
+    mv.setAttribute('loading',      'eager');
     mv.style.cssText = 'display:block;width:100%;height:300px;background:transparent;';
     vw.insertBefore(mv, vw.querySelector('.viewer-hint'));
   } else {
@@ -748,6 +755,7 @@ mv.setAttribute('ar-scale', 'fixed');
 function closeModal() {
   document.getElementById('modal-overlay').classList.remove('open');
   document.body.style.overflow = '';
+  // Remove model-viewer completely to stop streaming / free memory
   const mv = document.querySelector('#modal-viewer-wrap model-viewer');
   if (mv) mv.remove();
 }
@@ -758,6 +766,9 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
+// ─────────────────────────────────────────────────────────────
+//  LANGUAGE SWITCH
+// ─────────────────────────────────────────────────────────────
 document.getElementById('lang-select').addEventListener('change', e => {
   currentLang = e.target.value;
   const t = I18N[currentLang] || I18N.en;
@@ -769,6 +780,9 @@ document.getElementById('lang-select').addEventListener('change', e => {
   renderItems();
 });
 
+// ─────────────────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────────────────
 async function init() {
   const loadingEl = document.getElementById('loading-state');
   const container = document.getElementById('items-container');
@@ -797,7 +811,6 @@ async function init() {
 }
 
 init();
-
 </script>
 </body>
 </html>
